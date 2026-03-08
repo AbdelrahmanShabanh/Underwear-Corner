@@ -24,6 +24,33 @@ router.post("/", async (req, res) => {
       userId: userId || null,
     });
 
+    const mongoose = require("mongoose");
+    const Product = require("../models/Product");
+
+    for (const item of items) {
+      if (!item.productId) continue;
+      const product = await Product.findById(item.productId);
+      if (product) {
+        if (product.stock >= item.quantity) {
+          product.stock -= item.quantity;
+        } else {
+          product.stock = 0;
+        }
+
+        if (product.sizes && product.sizes.length > 0 && item.size) {
+          const sizeObj = product.sizes.find(s => s.name === item.size);
+          if (sizeObj) {
+            if (sizeObj.stock >= item.quantity) {
+              sizeObj.stock -= item.quantity;
+            } else {
+              sizeObj.stock = 0;
+            }
+          }
+        }
+        await product.save();
+      }
+    }
+
     res.status(201).json({ order });
   } catch (err) {
     console.error("Create order error:", err);

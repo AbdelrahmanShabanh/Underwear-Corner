@@ -114,7 +114,7 @@ const Navbar = ({
                     title="Admin Dashboard"
                     onClick={closeMenu}
                   >
-                    <i className="fa-solid fa-shield-halved" style={{ fontSize: "0.85rem" }} />
+                    <i className="fa-solid fa-gear" style={{ fontSize: "0.85rem" }} />
                   </Link>
                 )}
                 <button

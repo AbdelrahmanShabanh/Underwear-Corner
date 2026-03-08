@@ -101,6 +101,7 @@
 }
 
 .navbar-search {
+  display: none;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   padding: 0.4rem 0.8rem;
@@ -337,7 +338,7 @@
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
 }
@@ -1080,6 +1081,7 @@ textarea {
 }
 
 .secondary-cta {
+  margin-top: 0.6rem;
   padding: 0.7rem 1.6rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1205,7 +1207,7 @@ textarea {
 .co-field input:focus,
 .co-field select:focus,
 .co-field textarea:focus {
-  border-color: #f3f3f3;
+  border-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(255,255,255,0.07);
   background: rgba(255, 255, 255, 0.05);
 }
@@ -1618,7 +1620,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at top, #1a1a24 0%, #0c0c11 60%);
+  
   padding: 2rem 1rem;
 }
 
@@ -1840,6 +1842,7 @@ textarea {
 }
 
 .admin-sidebar-header {
+  margin-top: 2.8rem;
   padding: 1.5rem 1.25rem;
   display: flex;
   align-items: center;
@@ -2701,5 +2704,156 @@ textarea {
 
   .admin-topbar {
     padding-top: 4.5rem;
+  }
+}
+
+/* ============================================================
+   ADMIN PRODUCTS
+   ============================================================ */
+
+.product-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.product-modal-content {
+  background: #14141a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPopIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.product-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f3f3f3;
+}
+
+.product-modal-form {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.product-textarea {
+  min-height: 80px;
+  resize: vertical;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f3f3;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.product-textarea:focus {
+  border-color: #d6b15e;
+  box-shadow: 0 0 0 3px rgba(214, 177, 94, 0.15);
+}
+
+.product-select {
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f3f3;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.product-select:focus {
+  border-color: #d6b15e;
+}
+
+.product-select option {
+  background: #1a1a24;
+  color: #f3f3f3;
+}
+
+@media (max-width: 650px) {
+  .form-row-2, .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- PDF Generation Styling --- */
+.pdf-generating .order-item-img-wrap {
+  display: none !important;
+}
+
+/* --- Special Offers Horizontal Scroll --- */
+.special-offers-grid {
+  display: flex !important;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: -1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.special-offers-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.special-offers-grid > article.product-card {
+  flex: 0 0 65%;
+  scroll-snap-align: center;
+}
+
+@media (min-width: 600px) {
+  .special-offers-grid > article.product-card {
+    flex: 0 0 calc(50% - 1.5rem); 
+  }
+}
+
+@media (min-width: 900px) {
+  .special-offers-grid > article.product-card {
+    flex: 0 0 calc(25% - 1.5rem); 
   }
 }

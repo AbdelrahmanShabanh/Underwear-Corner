@@ -35,11 +35,7 @@ const Login = ({ language }) => {
         user = await login(form.email, form.password);
       }
 
-      if (user.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     } catch (err) {
       const msg = err.response?.data?.error || (isRtl ? "حدث خطأ" : "Something went wrong");
       setError(msg);

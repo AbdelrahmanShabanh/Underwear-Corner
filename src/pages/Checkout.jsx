@@ -35,18 +35,22 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [showReturnPolicy, setShowReturnPolicy] = useState(false);
 
-  const total = cartItems.reduce((sum, item) => {
-    const n = parseFloat(item.price.replace(/[^\d.]/g, ""));
-    return sum + n * item.quantity;
-  }, 0);
+  const parsePrice = (price) => {
+    if (typeof price === 'number') return price;
+    const match = String(price).match(/[\d.]+/);
+    return match ? parseFloat(match[0]) : 0;
+  };
+
+  const total = cartItems.reduce((sum, item) => sum + parsePrice(item.price) * (Number(item.quantity) || 1), 0);
 
   const validate = () => {
     const errs = {};
     if (!form.fullName.trim()) errs.fullName = isRtl ? "الاسم مطلوب" : "Full name is required";
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email))
       errs.email = isRtl ? "بريد إلكتروني غير صحيح" : "Valid email is required";
-    if (!form.phone.trim() || form.phone.replace(/\D/g, "").length < 10)
+    if (!form.phone.trim() || form.phone.replace(/\D/g, "").length !== 11)
       errs.phone = isRtl ? "رقم هاتف غير صحيح" : "Valid phone number is required";
     if (!form.governorate) errs.governorate = isRtl ? "اختر المحافظة" : "Governorate is required";
     if (!form.address.trim()) errs.address = isRtl ? "العنوان مطلوب" : "Address is required";
@@ -98,11 +102,11 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
     // Save order to backend API
     try {
       const orderItems = cartItems.map((item) => ({
-        productId: item.id,
+        productId: item._id,
         name: item.name?.en || item.name,
         size: item.size,
         quantity: item.quantity,
-        price: parseFloat(item.price.replace(/[^\d.]/g, "")),
+        price: parsePrice(item.price),
         image: item.image || "",
       }));
 
@@ -219,9 +223,9 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
               <div className={`co-field ${errors.governorate ? "co-field--error" : ""}`}>
                 <label>{isRtl ? "المحافظة" : "Governorate"} *</label>
                 <select value={form.governorate} onChange={handleChange("governorate")}>
-                  <option value="">{isRtl ? "اختر المحافظة" : "Select governorate"}</option>
+                  <option value="" style={{ color: "#000" }}>{isRtl ? "اختر المحافظة" : "Select governorate"}</option>
                   {govList.map((g, i) => (
-                    <option key={i} value={GOVERNORATES[i]}>{g}</option>
+                    <option key={i} value={GOVERNORATES[i]} style={{ color: "#000" }}>{g}</option>
                   ))}
                 </select>
                 {errors.governorate && <span className="co-error">{errors.governorate}</span>}
@@ -335,9 +339,8 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
               </p>
             ) : (
               cartItems.map((item) => {
-                const n = parseFloat(item.price.replace(/[^\d.]/g, ""));
                 return (
-                  <div key={`${item.id}-${item.size}`} className="co-summary-item">
+                  <div key={`${item._id}-${item.size}`} className="co-summary-item">
                     <div className="co-summary-img-wrap">
                       {item.image ? (
                         <img src={item.image} alt={item.name[language] || item.name.en} />
@@ -355,7 +358,7 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
                       </p>
                     </div>
                     <span className="co-summary-price">
-                      LE {(n * item.quantity).toFixed(2)}
+                      LE {(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 );
@@ -381,11 +384,97 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
             <span>LE {total.toFixed(2)}</span>
           </div>
 
-          <div className="co-no-return-warning">
+          <div className="co-no-return-warning" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
             لا يوجد استرجاع لاي منتج تحت اي ظرف
+            <button 
+              type="button" 
+              onClick={() => setShowReturnPolicy(true)}
+              style={{
+                background: "transparent",
+                border: "1px solid #ff4d4f",
+                color: "#ff4d4f",
+                borderRadius: "50%",
+                width: "20px",
+                height: "20px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.75rem",
+                fontWeight: "bold",
+                cursor: "pointer",
+                padding: 0,
+                lineHeight: 1
+              }}
+              title={isRtl ? "عرض سياسة الاسترجاع" : "View Return Policy"}
+            >
+              ?
+            </button>
           </div>
         </aside>
       </div>
+
+      {showReturnPolicy && (
+        <div className="return-policy-modal" style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.7)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem"
+        }}>
+          <div className="return-policy-content" style={{
+            background: "#1a1a24",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "16px",
+            padding: "1.5rem",
+            maxWidth: "500px",
+            width: "100%",
+            position: "relative",
+            direction: "rtl",
+            textAlign: "right",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+          }}>
+            <button 
+              type="button" 
+              onClick={() => setShowReturnPolicy(false)}
+              style={{
+                position: "absolute",
+                top: "1rem",
+                left: "1rem",
+                background: "transparent",
+                border: "none",
+                color: "rgba(255,255,255,0.6)",
+                fontSize: "1.25rem",
+                cursor: "pointer"
+              }}
+            >
+              <i className="fa-solid fa-xmark" />
+            </button>
+            <h3 style={{ color: "#d6b15e", marginTop: 0, marginBottom: "1rem", fontSize: "1.2rem" }}>سياسة الاسترجاع والاستبدال</h3>
+            <div style={{ fontSize: "0.9rem", lineHeight: "1.6", color: "#f3f3f3" }}>
+              <p style={{ marginBottom: "0.75rem" }}><strong>عميلنا العزيز،</strong> حرصاً منا على سلامتك العامة وطبقاً للاشتراطات الصحية المتبعة عالمياً وفي قانون حماية المستهلك المصري:</p>
+              
+              <p style={{ marginBottom: "0.75rem" }}>
+                <strong style={{ color: "#ff4d4f" }}>المنتجات الشخصية:</strong> نعتذر عن استبدال أو استرجاع أي من قطع الملابس الداخلية (البوكسرات، الفانلات، الملابس الداخلية الحريمي) بمجرد استلامها وفتح الغلاف الخاص بها، وذلك لضمان أعلى معايير النظافة والصحة العامة لجميع عملائنا.
+              </p>
+              
+              <p style={{ marginBottom: "0.75rem" }}>
+                <strong style={{ color: "#d6b15e" }}>المعاينة عند الاستلام:</strong> يرجى التأكد من المقاس والنوع والعدد فور وصول المندوب وقبل فتح الغلاف الداخلي للمنتج. في حالة وجود أي اختلاف أو رغبة في التراجع، يمكنكم رفض الاستلام مع دفع مصاريف الشحن فقط.
+              </p>
+              
+              <p style={{ marginBottom: "0.75rem" }}>
+                <strong style={{ color: "#d6b15e" }}>عيوب الصناعة:</strong> في حالة وجود عيب صناعة واضح في المنتج، يتم التواصل معنا خلال 24 ساعة من الاستلام، وسنقوم باستبدال المنتج مجاناً دون تحملكم أي تكاليف إضافية (بشرط عدم استخدام المنتج).
+              </p>
+              
+              <p style={{ margin: 0 }}>
+                <strong style={{ color: "#d6b15e" }}>المقاسات:</strong> يرجى مراجعة "جدول المقاسات" الموضح في صفحة كل منتج بعناية قبل الطلب، حيث أن اختيار المقاس الخاطئ لا يمنح الحق في الاسترجاع بعد فتح المنتج.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { products, sizes } from "../data/products";
+import axios from "axios";
+const fallbackSizes = ["S", "M", "L", "XL", "2XL", "3XL"];
 import { translations } from "../i18n";
 import Reveal from "../components/Reveal";
 
@@ -10,22 +11,52 @@ const ProductDetail = ({ language, onAddToCart }) => {
   const t = translations[language];
   const isRtl = language === "ar";
 
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [sizeError, setSizeError] = useState(false);
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get("/api/products");
+        setProducts(res.data.products);
+      } catch (err) {
+        console.error("Failed to load products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
+    setSelectedSize("");
+    setSizeError(false);
   }, [productId]);
 
-  const product = products.find((p) => p.id === productId);
+  const product = products.find((p) => p._id === productId);
+
+  if (loading) {
+    return (
+      <section className="page">
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
+          <div className="admin-loading-spinner" />
+        </div>
+      </section>
+    );
+  }
 
   if (!product) {
     return (
       <section className="page">
-        <p>{language === "en" ? "Product not found." : "المنتج غير موجود."}</p>
+        <p style={{ textAlign: "center", padding: "4rem" }}>{language === "en" ? "Product not found." : "المنتج غير موجود."}</p>
       </section>
     );
   }
+
+  const isSoldOut = product.stock === 0;
 
   const handleAddClick = () => {
     if (!selectedSize) {
@@ -59,7 +90,7 @@ const ProductDetail = ({ language, onAddToCart }) => {
 
         <div className="product-detail-layout">
           <div className="product-detail-media">
-            <img src={product.image} alt={product.name[language]} />
+            <img src={product.image || "/product-placeholder.jpg"} alt={product.name[language]} />
           </div>
           <div className="product-detail-body">
             <h1>{product.name[language]}</h1>
@@ -68,18 +99,26 @@ const ProductDetail = ({ language, onAddToCart }) => {
             </p>
             
             {product.isOffer ? (
-              <div className="product-priceRow" style={{ marginBottom: "1rem" }}>
-                <span className="product-oldPrice">{product.oldPrice}</span>
-                <span className="product-newPrice" style={{ fontSize: "1.2rem", fontWeight: "800", marginLeft: isRtl ? "0" : "0.5rem", marginRight: isRtl ? "0.5rem" : "0", color: "#f3f3f3" }}>{product.price}</span>
+              <div className="product-priceRow" style={{ marginBottom: "1rem", display: "flex", alignItems: "baseline" }}>
+                {product.oldPrice && (
+                  <span className="product-oldPrice" style={{ color: "#ef4444", textDecoration: "line-through", fontSize: "1rem" }}>
+                    LE {product.oldPrice.toFixed(2)}
+                  </span>
+                )}
+                <span className="product-newPrice" style={{ fontSize: "1.2rem", fontWeight: "800", marginLeft: isRtl ? "0" : "0.5rem", marginRight: isRtl ? "0.5rem" : "0", color: "#f3f3f3" }}>
+                  LE {product.price.toFixed(2)}
+                </span>
                 <span className="offer-badge" style={{ position: "relative", top: "auto", left: "auto", right: "auto", display: "inline-block", marginLeft: isRtl ? "0" : "0.5rem", marginRight: isRtl ? "0.5rem" : "0" }}>
                   {language === "en" ? "Special Offer" : "عرض خاص"}
                 </span>
               </div>
             ) : (
-              <div className="product-detail-price">{product.price}</div>
+              <div className="product-detail-price" style={{ fontSize: "1.2rem", fontWeight: "800", marginBottom: "1rem" }}>
+                LE {product.price.toFixed(2)}
+              </div>
             )}
 
-            {product.isSoldOut ? (
+            {isSoldOut ? (
               <div className="product-detail-sold-out">
                 {language === "en" ? "Currently Sold Out" : "نفدت الكمية حالياً"}
               </div>
@@ -89,21 +128,36 @@ const ProductDetail = ({ language, onAddToCart }) => {
                   <span className="sizes-label">
                     {language === "en" ? "Sizes" : "المقاسات"}
                   </span>
-                  <div className="sizes-grid">
-                    {sizes.map((size) => (
-                      <button
-                        key={size}
-                        type="button"
-                        className={`size-pill ${selectedSize === size ? "is-selected" : ""}`}
-                        style={selectedSize === size ? { background: '#f3f3f3', color: '#111' } : {}}
-                        onClick={() => {
-                          setSelectedSize(size);
-                          setSizeError(false);
-                        }}
-                      >
-                        {size}
-                      </button>
-                    ))}
+                  <div className="sizes-grid" style={{ alignItems: "flex-start" }}>
+                    {(product.sizes && product.sizes.length > 0 ? product.sizes : fallbackSizes).map((s) => {
+                      const szName = typeof s === 'string' ? s : s.name;
+                      const szStock = typeof s === 'string' ? 1 : s.stock; 
+                      const szNum = typeof s === 'string' ? null : s.sizeNumber;
+                      const isSzSoldOut = szStock === 0;
+
+                      return (
+                        <div key={szName} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
+                          <button
+                            type="button"
+                            disabled={isSzSoldOut}
+                            className={`size-pill ${selectedSize === szName ? "is-selected" : ""} ${isSzSoldOut ? "is-disabled" : ""}`}
+                            style={selectedSize === szName ? { background: '#f3f3f3', color: '#111' } : (isSzSoldOut ? { opacity: 0.3, cursor: 'not-allowed', textDecoration: 'line-through' } : {})}
+                            onClick={() => {
+                              if (isSzSoldOut) return;
+                              setSelectedSize(szName);
+                              setSizeError(false);
+                            }}
+                          >
+                            {szName}
+                          </button>
+                          {szNum && product.hasSizeNumbers && (
+                            <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.05)", width: "22px", height: "22px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+                              {szNum}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   {sizeError && (
                     <div style={{ color: "#ff6b6b", fontSize: "0.85rem", marginTop: "0.5rem" }}>
@@ -137,23 +191,44 @@ const ProductDetail = ({ language, onAddToCart }) => {
           <h2>{t.youMayAlsoLike}</h2>
           <div className="products-grid">
             {products
-              .filter((p) => p.category === product.category && p.id !== product.id)
+              .filter((p) => p.category === product.category && p._id !== product._id)
               .slice(0, 3)
-              .map((p) => (
-                <article
-                  key={p.id}
-                  className="product-card"
-                  onClick={() => navigate(`/product/${p.id}`)}
-                >
-                  <div className="product-media">
-                    <img src={p.image} alt={p.name[language]} />
-                  </div>
-                  <div className="product-body">
-                    <h3 className="product-title">{p.name[language]}</h3>
-                    <p className="product-price">{p.price}</p>
-                  </div>
-                </article>
-              ))}
+              .map((p) => {
+                const isItemSoldOut = p.stock === 0;
+                return (
+                  <article
+                    key={p._id}
+                    className={`product-card ${isItemSoldOut ? "is-sold-out" : ""}`}
+                    onClick={() => navigate(`/product/${p._id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="product-media">
+                      {p.isOffer && (
+                        <span className="offer-badge" style={{ position: "absolute", top: "10px", right: "10px", zIndex: 2, background: "#d6b15e", color: "#111", padding: "0.2rem 0.5rem", borderRadius: "6px", fontSize: "0.75rem", fontWeight: "700" }}>
+                          {language === "en" ? "Offer" : "عرض"}
+                        </span>
+                      )}
+                      {isItemSoldOut && (
+                        <div className="sold-out-badge">
+                          {language === "en" ? "Sold Out" : "نفدت الكمية"}
+                        </div>
+                      )}
+                      <img src={p.image || "/product-placeholder.jpg"} alt={p.name[language]} />
+                    </div>
+                    <div className="product-body">
+                      <h3 className="product-title">{p.name[language]}</h3>
+                      <div className="product-priceRow" style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
+                        {p.isOffer && p.oldPrice && (
+                         <span className="product-oldPrice" style={{ color: "#ef4444", textDecoration: "line-through", fontSize: "0.85rem" }}>
+                           LE {p.oldPrice.toFixed(2)}
+                         </span>
+                        )}
+                        <p className="product-price" style={{ margin: 0 }}>LE {p.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
           </div>
         </div>
       </section>

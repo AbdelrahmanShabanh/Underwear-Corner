@@ -4,9 +4,11 @@ import { useAuth } from "../../context/AuthContext";
 import AdminStats from "./AdminStats";
 import AdminOrders from "./AdminOrders";
 import AdminUsers from "./AdminUsers";
+import AdminProducts from "./AdminProducts";
 
 const tabs = [
   { id: "dashboard", icon: "fa-solid fa-chart-line", labelEn: "Dashboard", labelAr: "لوحة التحكم" },
+  { id: "products", icon: "fa-solid fa-box-open", labelEn: "Products", labelAr: "المنتجات" },
   { id: "orders", icon: "fa-solid fa-bag-shopping", labelEn: "Orders", labelAr: "الطلبات" },
   { id: "users", icon: "fa-solid fa-users", labelEn: "Users", labelAr: "المستخدمين" },
 ];
@@ -43,6 +45,8 @@ const AdminDashboard = ({ language }) => {
     switch (activeTab) {
       case "dashboard":
         return <AdminStats language={language} />;
+      case "products":
+        return <AdminProducts language={language} />;
       case "orders":
         return <AdminOrders language={language} />;
       case "users":
@@ -93,6 +97,10 @@ const AdminDashboard = ({ language }) => {
         </nav>
 
         <div className="admin-sidebar-footer">
+          <button className="admin-nav-item" onClick={() => navigate("/")} style={{ marginBottom: "0.5rem" }}>
+            <i className="fa-solid fa-house" />
+            <span>{isRtl ? "العودة للمتجر" : "Store Home"}</span>
+          </button>
           <button className="admin-nav-item admin-logout-btn" onClick={handleLogout}>
             <i className="fa-solid fa-right-from-bracket" />
             <span>{isRtl ? "تسجيل خروج" : "Logout"}</span>
@@ -106,8 +114,8 @@ const AdminDashboard = ({ language }) => {
           <div className="admin-welcome">
             <h1 className="admin-welcome-title">
               {isRtl
-                ? `أهلاً مجدداً، ${user?.name || "Admin"} 👋`
-                : `Welcome back, ${user?.name || "Admin"} 👋`}
+                ? <>أهلاً مجدداً، {user?.name || "Admin"} <i className="fa-solid fa-wand-magic-sparkles" style={{ color: "#d6b15e", fontSize: "1.2rem", marginLeft: "0.5rem" }}></i></>
+                : <>Welcome back, {user?.name || "Admin"} <i className="fa-solid fa-wand-magic-sparkles" style={{ color: "#d6b15e", fontSize: "1.2rem", marginLeft: "0.5rem" }}></i></>}
             </h1>
             <p className="admin-welcome-sub">
               {isRtl

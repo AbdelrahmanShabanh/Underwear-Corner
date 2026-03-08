@@ -23,10 +23,7 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
     return acc;
   }, {});
 
-  const grandTotal = items.reduce((sum, item) => {
-    const numeric = parseFloat(item.price.replace(/[^\d.]/g, ""));
-    return sum + numeric * item.quantity;
-  }, 0);
+  const grandTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const isRtl = language === "ar";
 
@@ -56,10 +53,7 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
           ) : (
             <div className="cart-groups">
               {Object.entries(groups).map(([cat, groupItems]) => {
-                const groupTotal = groupItems.reduce((sum, item) => {
-                  const n = parseFloat(item.price.replace(/[^\d.]/g, ""));
-                  return sum + n * item.quantity;
-                }, 0);
+                const groupTotal = groupItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
                 const totalQty = groupItems.reduce((s, i) => s + i.quantity, 0);
                 const catLabel = (categoryLabels[language] || categoryLabels.en)[cat] || cat;
 
@@ -89,9 +83,8 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
                     {/* Items */}
                     <ul className="cart-items">
                       {groupItems.map((item) => {
-                        const numericPrice = parseFloat(item.price.replace(/[^\d.]/g, ""));
                         return (
-                          <li key={`${item.id}-${item.size}`} className="cart-item">
+                          <li key={`${item._id}-${item.size}`} className="cart-item">
                             {/* Product image */}
                             <div className="cart-item-img-wrap">
                               {item.image ? (
@@ -110,7 +103,7 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
                             {/* Info */}
                             <div className="cart-item-details">
                               <p className="cart-item-name">{item.name[language] || item.name.en}</p>
-                              <p className="cart-item-price">LE {numericPrice.toFixed(2)}</p>
+                              <p className="cart-item-price">LE {item.price.toFixed(2)}</p>
                               {item.color && (
                                 <p className="cart-item-attr">
                                   <span className="cart-attr-label">{isRtl ? "اللون:" : "Color:"}</span>

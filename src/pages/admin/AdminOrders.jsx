@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import html2pdf from "html2pdf.js";
 
 const STATUS_OPTIONS = ["pending", "confirmed", "delivered", "cancelled"];
 
@@ -39,6 +40,25 @@ const AdminOrders = ({ language }) => {
     } catch (err) {
       console.error("Status update error:", err);
     }
+  };
+
+  const handleDownloadPDF = (order) => {
+    const element = document.getElementById(`order-detail-${order._id}`);
+    if (!element) return;
+    
+    element.classList.add("pdf-generating");
+    
+    const opt = {
+      margin:       0.5,
+      filename:     `Order_${order._id.slice(-6).toUpperCase()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+      element.classList.remove("pdf-generating");
+    });
   };
 
   const filteredOrders =
@@ -112,7 +132,7 @@ const AdminOrders = ({ language }) => {
 
               {/* Expanded details */}
               {expandedOrder === order._id && (
-                <div className="order-card-body">
+                <div className="order-card-body" id={`order-detail-${order._id}`}>
                   {/* Customer info */}
                   <div className="order-detail-section">
                     <h4>
@@ -179,17 +199,27 @@ const AdminOrders = ({ language }) => {
                   </div>
 
                   {/* Meta */}
-                  <div className="order-meta-row">
-                    <span>
-                      <i className="fa-solid fa-credit-card" />{" "}
-                      {order.paymentMethod === "cash"
-                        ? isRtl ? "الدفع عند الاستلام" : "Cash on Delivery"
-                        : "InstaPay"}
-                    </span>
-                    <span>
-                      <i className="fa-solid fa-clock" />{" "}
-                      {new Date(order.createdAt).toLocaleString()}
-                    </span>
+                  <div className="order-meta-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "1rem" }}>
+                      <span>
+                        <i className="fa-solid fa-credit-card" />{" "}
+                        {order.paymentMethod === "cash"
+                          ? isRtl ? "الدفع عند الاستلام" : "Cash on Delivery"
+                          : "InstaPay"}
+                      </span>
+                      <span>
+                        <i className="fa-solid fa-clock" />{" "}
+                        {new Date(order.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <button 
+                      className="login-btn" 
+                      style={{ padding: "0.4rem 0.8rem", width: "auto", margin: 0, fontSize: "0.85rem", background: "#d6b15e", color: "#111" }}
+                      onClick={() => handleDownloadPDF(order)}
+                    >
+                      <i className="fa-solid fa-download" style={{ marginRight: isRtl ? 0 : "0.4rem", marginLeft: isRtl ? "0.4rem" : 0 }} />
+                      {isRtl ? "تحميل PDF" : "Download PDF"}
+                    </button>
                   </div>
                 </div>
               )}

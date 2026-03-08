@@ -27,7 +27,7 @@ function App() {
   const addToCart = (product) => {
     setCartItems((prev) => {
       const existing = prev.find(
-        (item) => item.id === product.id && item.size === product.size
+        (item) => item._id === product._id && item.size === product.size
       );
       if (existing) {
         return prev.map((item) =>
@@ -42,7 +42,7 @@ function App() {
   const updateQuantity = (target, qty) => {
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === target.id && item.size === target.size
+        item._id === target._id && item.size === target.size
           ? { ...item, quantity: Math.max(1, qty) }
           : item
       )
@@ -51,7 +51,7 @@ function App() {
 
   const removeFromCart = (target) => {
     setCartItems((prev) =>
-      prev.filter((item) => !(item.id === target.id && item.size === target.size))
+      prev.filter((item) => !(item._id === target._id && item.size === target.size))
     );
   };
 
