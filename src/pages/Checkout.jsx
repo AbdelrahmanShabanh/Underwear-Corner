@@ -19,6 +19,18 @@ const GOVERNORATES_AR = [
   "جنوب سيناء", "السويس", "الأقصر", "مطروح", "قنا", "سوهاج", "أسوان", "أسيوط", "بني سويف",
 ];
 
+const GOV_FEES = {
+  "Cairo": 85, "Giza": 85,
+  "Alexandria": 90,
+  "Dakahlia": 100, "Beheira": 100, "Gharbia": 100, "Menofia": 100, 
+  "Qalyubia": 100, "Damietta": 100, "Sharqia": 100, "Ismailia": 100, "Suez": 100,
+  "Port Said": 50,
+  "Fayoum": 110, "Beni Suef": 110, "Minya": 110, "Assiut": 110, 
+  "Sohag": 110, "Qena": 110, "Luxor": 110, "Aswan": 110, 
+  "Red Sea": 110, "New Valley": 110, "North Sinai": 110, 
+  "South Sinai": 110, "Matrouh": 110,
+};
+
 const Checkout = ({ language, cartItems, onClearCart }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -44,6 +56,8 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
   };
 
   const total = cartItems.reduce((sum, item) => sum + parsePrice(item.price) * (Number(item.quantity) || 1), 0);
+  const deliveryFee = form.governorate ? (GOV_FEES[form.governorate] || 110) : 0;
+  const finalTotal = total + deliveryFee;
 
   const validate = () => {
     const errs = {};
@@ -80,7 +94,9 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
       `Governorate: ${govLabel}\n` +
       `Address: ${form.address}\n\n` +
       `📦 *Order Items*\n${itemLines}\n\n` +
-      `💰 *Total: LE ${total.toFixed(2)}*\n` +
+      `💰 *Subtotal: LE ${total.toFixed(2)}*\n` +
+      `🚚 *Delivery Fee: LE ${deliveryFee.toFixed(2)}*\n` +
+      `💰 *Total: LE ${finalTotal.toFixed(2)}*\n` +
       `💳 *Payment Method:* ${payment}`
     );
   };
@@ -119,7 +135,7 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
           address: form.address,
         },
         items: orderItems,
-        total,
+        total: finalTotal,
         paymentMethod,
         userId: user?.id || null,
       });
@@ -374,14 +390,20 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
           </div>
           <div className="co-summary-row">
             <span>{isRtl ? "الشحن" : "Shipping"}</span>
-            <span className="co-free-tag">{isRtl ? "مجاني" : "Free"}</span>
+            {deliveryFee === 0 && !form.governorate ? (
+              <span className="co-free-tag" style={{ background: "rgba(255,255,255,0.1)", color: "#999", border: "none" }}>{isRtl ? "اختر المحافظة" : "Select Gov"}</span>
+            ) : deliveryFee === 0 ? (
+              <span className="co-free-tag">{isRtl ? "مجاني" : "Free"}</span>
+            ) : (
+              <span>LE {deliveryFee.toFixed(2)}</span>
+            )}
           </div>
 
           <div className="co-summary-divider" />
 
           <div className="co-summary-row co-summary-total">
             <span>{isRtl ? "الإجمالي" : "Total"}</span>
-            <span>LE {total.toFixed(2)}</span>
+            <span>LE {finalTotal.toFixed(2)}</span>
           </div>
 
           <div className="co-no-return-warning" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
