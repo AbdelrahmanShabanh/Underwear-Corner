@@ -13,7 +13,6 @@ const categoryLabels = {
 
 const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove }) => {
   const navigate = useNavigate();
-  if (!open) return null;
 
   // Group items by category
   const groups = items.reduce((acc, item) => {
@@ -28,7 +27,7 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
   const isRtl = language === "ar";
 
   return (
-    <div className="cart-overlay" onClick={onClose}>
+    <div className={`cart-overlay${open ? " cart-open" : ""}`} onClick={onClose}>
       <aside
         className="cart-drawer"
         onClick={(e) => e.stopPropagation()}
