@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
-const WHATSAPP_NUMBER = "201008872621"; // 010... with country code, no +
+const WHATSAPP_NUMBER = "201030799748"; // 010... with country code, no +
 
 const GOVERNORATES = [
   "Cairo", "Giza", "Alexandria", "Dakahlia", "Red Sea", "Beheira",
@@ -422,17 +422,18 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
           </h3>
 
           <div className="co-summary-items">
-            {cartItems.length === 0 ? (
+            {activeItems.length === 0 ? (
               <p className="co-summary-empty">
                 {isRtl ? "سلة التسوق فارغة" : "Your cart is empty"}
               </p>
             ) : (
-              cartItems.map((item) => {
+              activeItems.map((item) => {
+                const itemName = typeof item.name === 'string' ? item.name : (item.name?.[language] || item.name?.en || "");
                 return (
-                  <div key={`${item._id}-${item.size}`} className="co-summary-item">
+                  <div key={`${item._id || item.productId}-${item.size}`} className="co-summary-item">
                     <div className="co-summary-img-wrap">
                       {item.image ? (
-                        <img src={item.image} alt={item.name[language] || item.name.en} loading="lazy" />
+                        <img src={item.image} alt={itemName} loading="lazy" />
                       ) : (
                         <div className="co-summary-img-placeholder">
                           <i className="fa-solid fa-shirt" />
@@ -441,7 +442,7 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
                       <span className="co-summary-qty">{item.quantity}</span>
                     </div>
                     <div className="co-summary-info">
-                      <p className="co-summary-name">{item.name[language] || item.name.en}</p>
+                      <p className="co-summary-name">{itemName}</p>
                       <p className="co-summary-meta">
                         {isRtl ? "المقاس" : "Size"}: {item.size}
                       </p>

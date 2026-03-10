@@ -24,7 +24,7 @@ const Contact = ({ language }) => {
               : "أرسل لنا رسالة على واتساب لأي مشكلة أو استفسار."}
           </p>
           <a
-            href="https://wa.me/201008872621?text=Hello%21%20I%20have%20a%20question..."
+            href="https://wa.me/201030799748?text=Hello%21%20I%20have%20a%20question..."
             target="_blank"
             rel="noopener noreferrer"
             className="hero-cta"
