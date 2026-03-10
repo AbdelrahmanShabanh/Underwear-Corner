@@ -39,24 +39,24 @@ router.get("/", requireAdmin, async (req, res) => {
       cancelledOrders,
       recentOrders,
     ] = await Promise.all([
-      Order.countDocuments(),
+      Order.countDocuments({ status: { $in: ["confirmed", "delivered"] } }),
       Order.aggregate([
-        { $match: { status: { $ne: "cancelled" } } },
+        { $match: { status: { $in: ["confirmed", "delivered"] } } },
         { $group: { _id: null, total: { $sum: "$total" } } },
       ]),
-      Order.countDocuments({ createdAt: { $gte: startOfWeek } }),
-      Order.countDocuments({ createdAt: { $gte: startOfMonth } }),
-      Order.countDocuments({ createdAt: { $gte: startOfYear } }),
+      Order.countDocuments({ createdAt: { $gte: startOfWeek }, status: { $in: ["confirmed", "delivered"] } }),
+      Order.countDocuments({ createdAt: { $gte: startOfMonth }, status: { $in: ["confirmed", "delivered"] } }),
+      Order.countDocuments({ createdAt: { $gte: startOfYear }, status: { $in: ["confirmed", "delivered"] } }),
       Order.aggregate([
-        { $match: { createdAt: { $gte: startOfWeek }, status: { $ne: "cancelled" } } },
-        { $group: { _id: null, total: { $sum: "$total" } } },
-      ]),
-      Order.aggregate([
-        { $match: { createdAt: { $gte: startOfMonth }, status: { $ne: "cancelled" } } },
+        { $match: { createdAt: { $gte: startOfWeek }, status: { $in: ["confirmed", "delivered"] } } },
         { $group: { _id: null, total: { $sum: "$total" } } },
       ]),
       Order.aggregate([
-        { $match: { createdAt: { $gte: startOfYear }, status: { $ne: "cancelled" } } },
+        { $match: { createdAt: { $gte: startOfMonth }, status: { $in: ["confirmed", "delivered"] } } },
+        { $group: { _id: null, total: { $sum: "$total" } } },
+      ]),
+      Order.aggregate([
+        { $match: { createdAt: { $gte: startOfYear }, status: { $in: ["confirmed", "delivered"] } } },
         { $group: { _id: null, total: { $sum: "$total" } } },
       ]),
       Order.countDocuments({ status: "pending" }),

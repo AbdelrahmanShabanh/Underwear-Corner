@@ -75,27 +75,66 @@ const AdminOrders = ({ language }) => {
   return (
     <div className="admin-orders">
       {/* Filter bar */}
-      <div className="orders-filter-bar">
-        <h2 className="orders-title">
+      <div className="orders-filter-bar" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
+        <h2 className="orders-title" style={{ margin: 0 }}>
           <i className="fa-solid fa-bag-shopping" />
           {isRtl ? ` الطلبات (${orders.length})` : ` Orders (${orders.length})`}
         </h2>
-        <div className="orders-filter-pills">
-          <button
-            className={`filter-pill ${filterStatus === "all" ? "is-active" : ""}`}
-            onClick={() => setFilterStatus("all")}
-          >
-            {isRtl ? "الكل" : "All"}
-          </button>
-          {STATUS_OPTIONS.map((s) => (
+        
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+          <div className="orders-filter-pills" style={{ margin: 0 }}>
             <button
-              key={s}
-              className={`filter-pill filter-pill--${s} ${filterStatus === s ? "is-active" : ""}`}
-              onClick={() => setFilterStatus(s)}
+              className={`filter-pill ${filterStatus === "all" ? "is-active" : ""}`}
+              onClick={() => setFilterStatus("all")}
             >
-              {isRtl ? STATUS_LABELS[s].ar : STATUS_LABELS[s].en}
+              {isRtl ? "الكل" : "All"}
             </button>
-          ))}
+            {STATUS_OPTIONS.map((s) => (
+              <button
+                key={s}
+                className={`filter-pill filter-pill--${s} ${filterStatus === s ? "is-active" : ""}`}
+                onClick={() => setFilterStatus(s)}
+              >
+                {isRtl ? STATUS_LABELS[s].ar : STATUS_LABELS[s].en}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={async () => {
+              const pass = window.prompt(isRtl ? "أدخل كلمة المرور لحذف جميع الطلبات:" : "Enter password to delete all orders:");
+              if (pass !== "12345") {
+                if (pass !== null) alert(isRtl ? "كلمة المرور خاطئة" : "Incorrect password");
+                return;
+              }
+              if (!window.confirm(isRtl ? "هل أنت متأكد من حذف جميع الطلبات نهائياً؟" : "Are you sure you want to permanently delete ALL orders?")) return;
+              
+              try {
+                await axios.delete("/api/orders/all");
+                setOrders([]);
+                alert(isRtl ? "تم حذف جميع الطلبات" : "All orders deleted successfully");
+              } catch (err) {
+                console.error("Delete all error:", err);
+                alert("Error deleting orders");
+              }
+            }}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#ef4444",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem"
+            }}
+          >
+            <i className="fa-solid fa-trash-can" />
+            {isRtl ? "حذف جميع الطلبات" : "Delete All Orders"}
+          </button>
         </div>
       </div>
 

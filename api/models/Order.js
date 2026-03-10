@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   customer: {
-    fullName: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
-    governorate: { type: String, required: true },
-    address: { type: String, required: true },
+    fullName: { type: String, required: function() { return this.status !== 'draft'; } },
+    email: { type: String, required: function() { return this.status !== 'draft'; } },
+    phone: { type: String, required: function() { return this.status !== 'draft'; } },
+    governorate: { type: String, required: function() { return this.status !== 'draft'; } },
+    address: { type: String, required: function() { return this.status !== 'draft'; } },
   },
   items: [
     {
@@ -26,7 +26,7 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "confirmed", "delivered", "cancelled"],
+    enum: ["pending", "confirmed", "delivered", "cancelled", "draft"],
     default: "pending",
   },
   userId: {

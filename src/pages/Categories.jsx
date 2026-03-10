@@ -97,6 +97,7 @@ const Categories = ({ language, searchQuery }) => {
                         <img
                           src={product.image || "/product-placeholder.jpg"}
                           alt={product.name[language]}
+                          loading="lazy"
                         />
                       </div>
                       <div className="product-body">

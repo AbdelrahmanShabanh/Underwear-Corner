@@ -95,35 +95,46 @@ function App() {
                   onUpdateQuantity={updateQuantity}
                   onRemove={removeFromCart}
                 />
-                <main className="app-main">
-                  <Routes>
-                    <Route path="/" element={<Home language={language} />} />
-                    <Route
-                      path="/categories"
-                      element={
-                        <Categories language={language} searchQuery={searchQuery} />
-                      }
-                    />
-                    <Route
-                      path="/product/:productId"
-                      element={
-                        <ProductDetail language={language} onAddToCart={addToCart} />
-                      }
-                    />
-                    <Route path="/contact" element={<Contact language={language} />} />
-                    <Route
-                      path="/checkout"
-                      element={
-                        <Checkout
-                          language={language}
-                          cartItems={cartItems}
-                          onClearCart={clearCart}
-                        />
-                      }
-                    />
-                    <Route path="/login" element={<Login language={language} />} />
-                  </Routes>
-                </main>
+                {/* Page content main area */}
+          <main className="app-main">
+            <Routes>
+              {/* Public Shop Routes */}
+              <Route
+                path="/"
+                element={<Home language={language} onAddToCart={addToCart} />}
+              />
+              <Route
+                path="/categories"
+                element={<Categories language={language} onAddToCart={addToCart} />}
+              />
+              <Route path="/contact" element={<Contact language={language} />} />
+              <Route
+                path="/product/:productId"
+                element={<ProductDetail language={language} onAddToCart={addToCart} />}
+              />
+
+              {/* Checkout + Auth */}
+              <Route
+                path="/checkout"
+                element={
+                  <Checkout
+                    language={language}
+                    cartItems={cartItems}
+                    onClearCart={clearCart}
+                  />
+                }
+              />
+              <Route path="/login" element={<Login language={language} />} />
+
+              {/* Admin Dashboard */}
+              <Route
+                path="/admin/*"
+                element={
+                  <AdminDashboard language={language} />
+                }
+              />
+            </Routes>
+          </main>
                 <Footer language={language} />
               </>
             }

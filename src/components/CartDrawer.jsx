@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const categoryIcons = {
   men: <i className="fa-solid fa-person" />,
@@ -25,6 +26,40 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
   const grandTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const isRtl = language === "ar";
+
+  const [isDrafting, setIsDrafting] = useState(false);
+
+  const handleCheckout = async () => {
+    if (items.length === 0) return;
+    setIsDrafting(true);
+    try {
+      const orderItems = items.map((item) => ({
+        productId: item._id,
+        name: item.name?.en || item.name,
+        size: item.size,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image || "",
+      }));
+
+      const res = await fetch("/api/orders/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: orderItems, total: grandTotal }),
+      });
+      const data = await res.json();
+
+      onClose();
+      navigate(`/checkout?orderId=${data.order._id}`);
+    } catch (err) {
+      console.error("Failed to create draft order", err);
+      // Fallback
+      onClose();
+      navigate("/checkout");
+    } finally {
+      setIsDrafting(false);
+    }
+  };
 
   return (
     <div className={`cart-overlay${open ? " cart-open" : ""}`} onClick={onClose}>
@@ -91,6 +126,7 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
                                   src={item.image}
                                   alt={item.name[language] || item.name.en}
                                   className="cart-item-img"
+                                  loading="lazy"
                                 />
                               ) : (
                                 <div className="cart-item-img-placeholder">
@@ -163,13 +199,12 @@ const CartDrawer = ({ language, open, items, onClose, onUpdateQuantity, onRemove
           <button
             type="button"
             className="cart-checkout-btn"
-            disabled={items.length === 0}
-            onClick={() => {
-              onClose();
-              navigate("/checkout");
-            }}
+            disabled={items.length === 0 || isDrafting}
+            onClick={handleCheckout}
           >
-            {isRtl ? "إتمام الشراء" : "CHECKOUT"}
+            {isDrafting 
+              ? (isRtl ? "جاري التجهيز..." : "PROCESSING...") 
+              : (isRtl ? "إتمام الشراء" : "CHECKOUT")}
           </button>
         </footer>
       </aside>

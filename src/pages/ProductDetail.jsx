@@ -90,7 +90,7 @@ const ProductDetail = ({ language, onAddToCart }) => {
 
         <div className="product-detail-layout">
           <div className="product-detail-media">
-            <img src={product.image || "/product-placeholder.jpg"} alt={product.name[language]} />
+            <img src={product.image || "/product-placeholder.jpg"} alt={product.name[language]} loading="lazy" />
           </div>
           <div className="product-detail-body">
             <h1>{product.name[language]}</h1>
@@ -213,7 +213,7 @@ const ProductDetail = ({ language, onAddToCart }) => {
                           {language === "en" ? "Sold Out" : "نفدت الكمية"}
                         </div>
                       )}
-                      <img src={p.image || "/product-placeholder.jpg"} alt={p.name[language]} />
+                      <img src={p.image || "/product-placeholder.jpg"} alt={p.name[language]} loading="lazy" />
                     </div>
                     <div className="product-body">
                       <h3 className="product-title">{p.name[language]}</h3>

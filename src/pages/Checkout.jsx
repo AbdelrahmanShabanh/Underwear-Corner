@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -33,8 +33,12 @@ const GOV_FEES = {
 
 const Checkout = ({ language, cartItems, onClearCart }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const isRtl = language === "ar";
+  
+  const searchParams = new URLSearchParams(location.search);
+  const orderId = searchParams.get("orderId");
 
   const [form, setForm] = useState({
     fullName: "",
@@ -48,6 +52,21 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [showReturnPolicy, setShowReturnPolicy] = useState(false);
+  const [draftOrder, setDraftOrder] = useState(null);
+  const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    
+    // Fetch draft order if orderId exists
+    if (orderId) {
+      setIsLoadingDraft(true);
+      axios.get(`/api/orders/${orderId}`)
+        .then(res => setDraftOrder(res.data.order))
+        .catch(err => console.error("Failed to load draft order", err))
+        .finally(() => setIsLoadingDraft(false));
+    }
+  }, [orderId]);
 
   const parsePrice = (price) => {
     if (typeof price === 'number') return price;
@@ -55,7 +74,8 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
     return match ? parseFloat(match[0]) : 0;
   };
 
-  const total = cartItems.reduce((sum, item) => sum + parsePrice(item.price) * (Number(item.quantity) || 1), 0);
+  const activeItems = draftOrder ? draftOrder.items : cartItems;
+  const total = activeItems.reduce((sum, item) => sum + parsePrice(item.price) * (Number(item.quantity) || 1), 0);
   const deliveryFee = form.governorate ? (GOV_FEES[form.governorate] || 110) : 0;
   const finalTotal = total + deliveryFee;
 
@@ -72,27 +92,36 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
   };
 
   const buildWhatsAppMessage = () => {
-    const itemLines = cartItems
+    const itemLines = activeItems
       .map(
         (item) =>
-          `• ${item.name["en"]} | Size: ${item.size} | Qty: ${item.quantity} | Price: ${item.price}`
+          `• ${item.name?.en || item.name} | Size: ${item.size} | Qty: ${item.quantity} | Price: ${item.price}`
       )
       .join("\n");
 
     const govLabel = form.governorate;
     const payment =
-      paymentMethod === "cash"
-        ? "Cash on Delivery"
-        : "Instapay (sent to 01000000)";
+     paymentMethod === "cash"
+  ? "Cash on Delivery"
+  : <>Instapay (sent to{" "}
+      <span
+        onClick={() => {
+          navigator.clipboard.writeText("01289527837");
+          alert("Number copied!");
+        }}
+        style={{ cursor: "pointer", color: "#d6b15e", textDecoration: "underline" }}
+      >
+        01289527837
+      </span>
+    )</>
 
+    let msgStr = `*${isRtl ? "طلب جديد من" : "New Order from"} ${form.fullName}*\n\n`;
+    if (orderId) msgStr += `*Order ID:* ${orderId}\n\n`;
+    
     return (
-      `🛍️ *New Order - Underwear Corner*\n\n` +
-      `👤 *Customer Details*\n` +
-      `Name: ${form.fullName}\n` +
-      `Email: ${form.email}\n` +
-      `Phone: ${form.phone}\n` +
-      `Governorate: ${govLabel}\n` +
-      `Address: ${form.address}\n\n` +
+      msgStr +
+      `*Contact:*\n📞 ${form.phone}\n📧 ${form.email}\n\n` +
+      `*Address:*\n📍 ${govLabel}\n🏠 ${form.address}\n\n` +
       `📦 *Order Items*\n${itemLines}\n\n` +
       `💰 *Subtotal: LE ${total.toFixed(2)}*\n` +
       `🚚 *Delivery Fee: LE ${deliveryFee.toFixed(2)}*\n` +
@@ -117,28 +146,44 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
 
     // Save order to backend API
     try {
-      const orderItems = cartItems.map((item) => ({
-        productId: item._id,
-        name: item.name?.en || item.name,
-        size: item.size,
-        quantity: item.quantity,
-        price: parsePrice(item.price),
-        image: item.image || "",
-      }));
+      if (orderId) {
+        // Confirm existing draft
+        await axios.put(`/api/orders/${orderId}/confirm`, {
+          customer: {
+            fullName: form.fullName,
+            email: form.email,
+            phone: form.phone,
+            governorate: form.governorate,
+            address: form.address,
+          },
+          total: finalTotal,
+          paymentMethod,
+        });
+      } else {
+        // Fallback: create fresh order if no orderId
+        const orderItems = activeItems.map((item) => ({
+          productId: item._id,
+          name: item.name?.en || item.name,
+          size: item.size,
+          quantity: item.quantity,
+          price: parsePrice(item.price),
+          image: item.image || "",
+        }));
 
-      await axios.post("/api/orders", {
-        customer: {
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          governorate: form.governorate,
-          address: form.address,
-        },
-        items: orderItems,
-        total: finalTotal,
-        paymentMethod,
-        userId: user?.id || null,
-      });
+        await axios.post("/api/orders", {
+          customer: {
+            fullName: form.fullName,
+            email: form.email,
+            phone: form.phone,
+            governorate: form.governorate,
+            address: form.address,
+          },
+          items: orderItems,
+          total: finalTotal,
+          paymentMethod,
+          userId: user?.id || null,
+        });
+      }
     } catch (err) {
       console.error("Failed to save order to API:", err);
     }
@@ -306,22 +351,50 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
             {/* Instapay instructions */}
             {paymentMethod === "instapay" && (
               <div className="co-instapay-info">
-                <p className="co-instapay-number">
-                  <i className="fa-solid fa-paper-plane" />
-                  {" "}
-                  {isRtl
-                    ? "أرسل المبلغ إلى رقم InstaPay:"
-                    : "Send the total amount to InstaPay number:"}
-                  {" "}
-                  <strong>01000000</strong>
-                </p>
-                <p className="co-instapay-screenshot">
-                  <i className="fa-solid fa-camera" />
-                  {" "}
-                  {isRtl
-                    ? "التقط لقطة شاشة للدفع وأرسلها إلى واتساب  01000000 لتأكيد الطلب."
-                    : "Take a screenshot of the payment and send it to 01000000 to confirm your order."}
-                </p>
+               <p className="co-instapay-number">
+  <i className="fa-solid fa-paper-plane" />
+  {" "}
+  {isRtl
+    ? "أرسل المبلغ إلى رقم InstaPay:"
+    : "Send the total amount to InstaPay number:"}
+  {" "}
+  <strong
+    onClick={() => {
+      navigator.clipboard.writeText("01289527837");
+      alert(isRtl ? "تم نسخ الرقم!" : "Number copied!");
+    }}
+    style={{ cursor: "pointer", color: "#d6b15e", textDecoration: "underline" }}
+  >
+    01289527837
+  </strong>
+</p>
+<p className="co-instapay-screenshot">
+  <i className="fa-solid fa-camera" />
+  {" "}
+  {isRtl
+    ? <>التقط لقطة شاشة للدفع وأرسلها إلى واتساب{" "}
+        <span
+          onClick={() => {
+            navigator.clipboard.writeText("01030799748");
+            alert(isRtl ? "تم نسخ الرقم!" : "Number copied!");
+          }}
+          style={{ cursor: "pointer", color: "#d6b15e", textDecoration: "underline" }}
+        >
+          01030799748
+        </span>
+        {" "}لتأكيد الطلب.</>
+    : <>Take a screenshot of the payment and send it to{" "}
+        <span
+          onClick={() => {
+            navigator.clipboard.writeText("01030799748");
+            alert(isRtl ? "تم نسخ الرقم!" : "Number copied!");
+          }}
+          style={{ cursor: "pointer", color: "#d6b15e", textDecoration: "underline" }}
+        >
+          01030799748
+        </span>
+        {" "}to confirm your order.</>}
+</p>
               </div>
             )}
           </section>
@@ -359,7 +432,7 @@ const Checkout = ({ language, cartItems, onClearCart }) => {
                   <div key={`${item._id}-${item.size}`} className="co-summary-item">
                     <div className="co-summary-img-wrap">
                       {item.image ? (
-                        <img src={item.image} alt={item.name[language] || item.name.en} />
+                        <img src={item.image} alt={item.name[language] || item.name.en} loading="lazy" />
                       ) : (
                         <div className="co-summary-img-placeholder">
                           <i className="fa-solid fa-shirt" />

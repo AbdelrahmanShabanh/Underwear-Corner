@@ -60,7 +60,7 @@ const ProductGrid = ({ language }) => {
                     {language === "en" ? "Sold Out" : "نفدت الكمية"}
                   </div>
                 )}
-                <img src={product.image || "/product-placeholder.jpg"} alt={product.name[language]} />
+                <img src={product.image || "/product-placeholder.jpg"} alt={product.name[language]} loading="lazy" />
               </div>
               <div className="product-body">
                 <h3 className="product-title">{product.name[language]}</h3>

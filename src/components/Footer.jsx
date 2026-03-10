@@ -26,8 +26,8 @@ const Footer = ({ language }) => {
           <div className="footer-col">
             <div className="footer-colTitle">{t.footer.contact}</div>
             <div className="footer-links">
-              <a href="mailto:hello@underwearcorner.com">hello@underwearcorner.com</a>
-              <a href="tel:+200000000000">+20 000 000 0000</a>
+              <a href="mailto:underwearcorner790@gmail.com">underwearcorner790@gmail.com </a>
+              <a href="tel:+201030799748">+201030799748</a>
             </div>
           </div>
         </div>
