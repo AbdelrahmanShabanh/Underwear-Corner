@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { translations } from "../i18n";
+import { ProductGridSkeleton } from "./SkeletonLoader";
 
 const SpecialOffers = ({ language }) => {
   const navigate = useNavigate();
@@ -28,9 +29,17 @@ const SpecialOffers = ({ language }) => {
     navigate(`/product/${product._id}`);
   };
 
-  if (loading) {
-    return null;
-  }
+if (loading) {
+  return (
+    <section className="products products--offers">
+      <div className="section-header">
+        <h2>{t.specialOffers}</h2>
+      </div>
+
+      <ProductGridSkeleton count={2} />
+    </section>
+  );
+}
 
   if (offerProducts.length === 0) {
     return null; // Hide the section completely if no offers exist

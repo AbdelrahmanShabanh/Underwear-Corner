@@ -40,9 +40,22 @@ const ProductDetail = ({ language, onAddToCart }) => {
 
   if (loading) {
     return (
-      <section className="page">
-        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
-          <div className="admin-loading-spinner" />
+      <section className="page product-detail">
+        <div className="product-detail-layout">
+          <div className="product-detail-media">
+            <div className="skeleton-shimmer" style={{ width: "100%", height: "400px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+          </div>
+          <div className="product-detail-body">
+            <div className="skeleton-shimmer" style={{ width: "70%", height: "28px", borderRadius: "8px", backgroundColor: "rgba(255,255,255,0.06)", marginBottom: "1rem" }} />
+            <div className="skeleton-shimmer" style={{ width: "100%", height: "16px", borderRadius: "6px", backgroundColor: "rgba(255,255,255,0.06)", marginBottom: "0.6rem" }} />
+            <div className="skeleton-shimmer" style={{ width: "85%", height: "16px", borderRadius: "6px", backgroundColor: "rgba(255,255,255,0.06)", marginBottom: "1.5rem" }} />
+            <div className="skeleton-shimmer" style={{ width: "35%", height: "22px", borderRadius: "8px", backgroundColor: "rgba(255,255,255,0.06)", marginBottom: "2rem" }} />
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              {[1,2,3,4].map(i => (
+                <div key={i} className="skeleton-shimmer" style={{ width: "48px", height: "48px", borderRadius: "12px", backgroundColor: "rgba(255,255,255,0.06)" }} />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     );

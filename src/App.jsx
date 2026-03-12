@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import { languages } from "./i18n";
 import CartDrawer from "./components/CartDrawer";
 import { AuthProvider } from "./context/AuthContext";
+import ScrollToTop from "./components/ScrollToTop";
 import "./App.css";
 
 function App() {
@@ -79,6 +80,7 @@ function App() {
             path="*"
             element={
               <>
+                <ScrollToTop />
                 <Navbar
                   language={language}
                   onToggleLanguage={toggleLanguage}

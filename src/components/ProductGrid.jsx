@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { translations } from "../i18n";
+import { ProductGridSkeleton } from "./SkeletonLoader";
 
 const ProductGrid = ({ language }) => {
   const navigate = useNavigate();
@@ -31,10 +32,8 @@ const ProductGrid = ({ language }) => {
   if (loading) {
     return (
       <section className="products">
-        <div className="section-header"><h2>{t.featuredCollection}</h2></div>
-        <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
-          <div className="admin-loading-spinner" />
-        </div>
+        <div className="section-header"><h2>{t.ourCategories}</h2></div>
+        <ProductGridSkeleton count={6} />
       </section>
     );
   }
@@ -42,7 +41,7 @@ const ProductGrid = ({ language }) => {
   return (
     <section className="products">
       <div className="section-header">
-        <h2>{t.featuredCollection}</h2>
+        <h2>{t.ourCategories}</h2>
       </div>
       <div className="products-grid">
         {products.map((product) => {

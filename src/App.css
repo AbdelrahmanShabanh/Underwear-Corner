@@ -2877,3 +2877,231 @@ textarea {
     flex: 0 0 calc(25% - 1.5rem); 
   }
 }
+
+/* ============================================================
+   HOME CATEGORIES SECTION
+   ============================================================ */
+
+.home-categories {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-bottom: 1.5rem;
+}
+
+.home-categories-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.2fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  height: 580px;
+}
+
+.home-category-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  height: 100%;
+}
+
+/* Image wrapper — enables zoom on hover */
+.home-category-card__img-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.home-category-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.home-category-card:hover .home-category-card__img {
+  transform: scale(1.05);
+}
+
+/* Gradient overlay — thin dark layer, heavier at bottom */
+.home-category-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  transition: background 0.35s ease;
+  z-index: 1;
+}
+
+.home-category-card:hover .home-category-card__overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 20%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+}
+
+/* Text content — bottom-left */
+.home-category-card__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.75rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+[dir="rtl"] .home-category-card__content {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.home-category-card__title {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 52px;
+  font-weight: 300;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.05;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
+.home-category-card__subtitle {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.15rem;
+}
+
+/* Ghost button */
+.home-category-card__btn {
+  margin-top: 0.85rem;
+  padding: 0.55rem 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #ffffff;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.home-category-card:hover .home-category-card__btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.home-category-card__btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #ffffff;
+}
+
+/* ---- Responsive ---- */
+
+/* Tablet — equal 3 columns, reduced height */
+@media (max-width: 900px) {
+  .home-categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+    height: 380px;
+  }
+
+  .home-category-card__title {
+    font-size: 36px;
+  }
+}
+
+/* Mobile — single column, taller cards, button always visible */
+@media (max-width: 600px) {
+  .home-categories-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 1.5rem;
+  }
+
+  .home-category-card {
+    height: 500px;
+  }
+
+  .home-category-card__title {
+    font-size: 42px;
+  }
+
+  .home-category-card__btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   SKELETON LOADER
+   ============================================================ */
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-card {
+  background: radial-gradient(circle at top, #2e2e35 0, #14141a 40%, #0c0c11 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-card__image {
+  width: 100%;
+  height: 200px;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton-card__body {
+  padding: 0.85rem 0.95rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.skeleton-card__line {
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton-card__line--title {
+  height: 14px;
+  width: 75%;
+}
+
+.skeleton-card__line--price {
+  height: 14px;
+  width: 40%;
+}

@@ -1,16 +1,26 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { translations } from "../i18n";
 import { categories as categoryList } from "../data/products";
 import Reveal from "../components/Reveal";
+import { ProductGridSkeleton } from "../components/SkeletonLoader";
 
 const Categories = ({ language, searchQuery }) => {
   const t = translations[language];
   const navigate = useNavigate();
-  const [activeId, setActiveId] = useState("men");
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category") || "men";
+  const [activeId, setActiveId] = useState(initialCategory);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat && ["men", "women", "kids"].includes(cat)) {
+      setActiveId(cat);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -63,8 +73,8 @@ const Categories = ({ language, searchQuery }) => {
         </div>
 
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
-            <div className="admin-loading-spinner" />
+          <div style={{ marginTop: "1.5rem" }}>
+            <ProductGridSkeleton count={6} />
           </div>
         ) : (
           <Reveal delayMs={80}>
@@ -124,4 +134,5 @@ const Categories = ({ language, searchQuery }) => {
 };
 
 export default Categories;
+
 
