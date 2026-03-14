@@ -5,17 +5,17 @@ const categoriesData = [
   {
     id: "men",
     labelKey: "men",
-    image: "/men.jpg",
+    image: "/gg.jpeg",
   },
   {
     id: "women",
     labelKey: "women",
-    image: "/download.jpg",
+    image: "/ff.jpeg",
   },
   {
     id: "kids",
     labelKey: "kids",
-    image: "/8719856811280-4.jpg",
+    image: "/WhatsApp Image 2026-03-14 at 10.28.00 PM.jpeg",
   },
 ];
 

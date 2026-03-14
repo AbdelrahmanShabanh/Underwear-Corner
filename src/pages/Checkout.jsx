@@ -20,11 +20,11 @@ const GOVERNORATES_AR = [
 ];
 
 const GOV_FEES = {
-  "Cairo": 85, "Giza": 85,
-  "Alexandria": 90,
+  "Cairo": 100, "Giza": 100,
+  "Alexandria": 105,
   "Dakahlia": 100, "Beheira": 100, "Gharbia": 100, "Menofia": 100, 
-  "Qalyubia": 100, "Damietta": 100, "Sharqia": 100, "Ismailia": 100, "Suez": 100,
-  "Port Said": 50,
+  "Qalyubia": 100, "Damietta": 110, "Sharqia": 100, "Ismailia": 110, "Suez": 100,
+  "Port Said": 60,
   "Fayoum": 110, "Beni Suef": 110, "Minya": 110, "Assiut": 110, 
   "Sohag": 110, "Qena": 110, "Luxor": 110, "Aswan": 110, 
   "Red Sea": 110, "New Valley": 110, "North Sinai": 110, 
