@@ -306,11 +306,11 @@ const AdminProducts = ({ language }) => {
               <div className="form-row-2">
                 <div className="login-field">
                   <label>{isRtl ? "الوصف (إنجليزي)" : "Description (English)"} *</label>
-                  <textarea name="descEn" value={form.descEn} onChange={handleInputChange} required className="product-textarea"></textarea>
+                  <textarea name="descEn" value={form.descEn} onChange={handleInputChange}  className="product-textarea"></textarea>
                 </div>
                 <div className="login-field">
                   <label>{isRtl ? "الوصف (عربي)" : "Description (Arabic)"} *</label>
-                  <textarea name="descAr" value={form.descAr} onChange={handleInputChange} required dir="rtl" className="product-textarea"></textarea>
+                  <textarea name="descAr" value={form.descAr} onChange={handleInputChange}  dir="rtl" className="product-textarea"></textarea>
                 </div>
               </div>
 
@@ -357,7 +357,7 @@ const AdminProducts = ({ language }) => {
                             if (isSelected) {
                               return { ...prev, sizes: prev.sizes.filter(s => s.name !== size) };
                             } else {
-                              return { ...prev, sizes: [...prev.sizes, { name: size, stock: 0, sizeNumber: defaultSizeNumbers[size] || "" }] };
+                              return { ...prev, sizes: [...prev.sizes, { name: size, stock: "", sizeNumber: defaultSizeNumbers[size] || "" }] };
                             }
                           });
                         }}
@@ -388,6 +388,7 @@ const AdminProducts = ({ language }) => {
                             type="number" 
                             min="0"
                             value={s.stock}
+                            placeholder="0"
                             onChange={(e) => setForm(prev => ({
                               ...prev,
                               sizes: prev.sizes.map(sz => sz.name === s.name ? { ...sz, stock: e.target.value } : sz)

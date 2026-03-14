@@ -9,7 +9,7 @@ import { ProductGridSkeleton } from "../components/SkeletonLoader";
 const Categories = ({ language, searchQuery }) => {
   const t = translations[language];
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get("category") || "men";
   const [activeId, setActiveId] = useState(initialCategory);
   const [products, setProducts] = useState([]);
@@ -65,7 +65,10 @@ const Categories = ({ language, searchQuery }) => {
               className={`category-card ${
                 cat.id === activeId ? "is-active" : ""
               }`}
-              onClick={() => setActiveId(cat.id)}
+              onClick={() => {
+                setActiveId(cat.id);
+                setSearchParams({ category: cat.id });
+              }}
             >
               <h2>{cat.label[language]}</h2>
             </article>

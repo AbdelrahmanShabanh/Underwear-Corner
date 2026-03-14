@@ -6,8 +6,8 @@ const productSchema = new mongoose.Schema({
     ar: { type: String, required: true },
   },
   description: {
-    en: { type: String, required: true },
-    ar: { type: String, required: true },
+    en: { type: String, default: ""  },
+    ar: { type: String, default: ""  },
   },
   price: { type: Number, required: true },
   category: {
